@@ -32,29 +32,23 @@ infoPanel.style.position = 'absolute';
 infoPanel.style.top = '20px';
 infoPanel.style.left = '20px';
 infoPanel.style.padding = '14px 18px';
-infoPanel.style.background = 'rgba(255, 255, 255, 0.92)';
+infoPanel.style.background = 'rgba(255, 255, 255, 0.95)';
 infoPanel.style.border = '1px solid #dddddd';
 infoPanel.style.borderRadius = '12px';
 infoPanel.style.fontFamily = 'Arial, sans-serif';
 infoPanel.style.fontSize = '15px';
-infoPanel.style.maxWidth = '340px';
-infoPanel.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
+infoPanel.style.maxWidth = '360px';
+infoPanel.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
 infoPanel.style.zIndex = '10';
 infoPanel.innerHTML = '<b>Select a component</b><br>Click any part of the LMF model.';
 document.body.appendChild(infoPanel);
 
-// COMPONENT DESCRIPTIONS
+// DESCRIPTIONS BY EXACT MESH NAME
 const descriptions = {
-  ladle: 'The ladle holds molten steel during treatment.',
-  electrode: 'Electrodes provide electrical energy for heating.',
-  roof: 'The roof covers the ladle during furnace operation.',
-  arm: 'The arm moves and positions furnace equipment.',
-  hopper: 'The hopper is used for alloy or additive feeding.',
-  pipe: 'Pipes transfer gases, additives, or support auxiliary systems.',
-  platform: 'The platform supports the LMF equipment.',
-  car: 'The ladle car transports the ladle into position.',
-  cable: 'Cables provide electrical or control connections.',
-  panel: 'The panel represents the control or service area.'
+  'Mesh050_2': 'Roof B — part of the furnace roof system.',
+  'Mesh051_2': 'Roof A — main roof section used during LMF treatment.',
+  'Mesh043_1': 'Robot for measurements and sampling.',
+  'Mesh006': 'LMF Bin — used for material/additive feeding.'
 };
 
 // LIGHTS
@@ -160,22 +154,18 @@ window.addEventListener('click', (event) => {
   selectedObject = clickedObject;
   originalMaterial = clickedObject.material;
 
+  // STRONG RED HIGHLIGHT
   const highlightMaterial = clickedObject.material.clone();
-  highlightMaterial.emissive = new THREE.Color(0x333333);
-  highlightMaterial.emissiveIntensity = 0.8;
+  highlightMaterial.color = new THREE.Color(0xff0000);
+  highlightMaterial.emissive = new THREE.Color(0xff0000);
+  highlightMaterial.emissiveIntensity = 0.35;
 
   selectedObject.material = highlightMaterial;
 
   const objectName = selectedObject.name || 'Unknown component';
 
-  let description = 'No description added yet for this component.';
-
-  for (const key in descriptions) {
-    if (objectName.toLowerCase().includes(key)) {
-      description = descriptions[key];
-      break;
-    }
-  }
+  const description =
+    descriptions[objectName] || 'No description added yet for this component.';
 
   infoPanel.innerHTML = `
     <b>Selected:</b> ${objectName}<br><br>
