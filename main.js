@@ -15,8 +15,18 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
+// CONTROLS
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
+
+// Zoom limits
+controls.minDistance = 5;
+controls.maxDistance = 18;
+
+// Prevent camera going under model
+controls.maxPolarAngle = Math.PI / 2.1;
+
+// Focus point
 controls.target.set(0, 2, 0);
 controls.update();
 
@@ -83,7 +93,6 @@ function modeButton(id, label, icon, active) {
         font-weight:700;
         cursor:pointer;
         box-shadow:${active ? '0 5px 14px rgba(37,99,235,0.35)' : '0 2px 8px rgba(0,0,0,0.08)'};
-        transition:all 0.2s ease;
       "
     >
       ${icon} ${label}
