@@ -48,11 +48,12 @@ const descriptions = {
   'Mesh051_1': 'Roof A — Close the ladle during heating and provide a controlled environment for electric arc treatment.',
   'Mesh050_1': 'Roof A — Doors for sampling, measurement, and manual FeAlloys addition.',
   'Mesh043_1': 'Robot for measurements and sampling.',
-  'MHS': 'Store, weigh, and automatically transfer additives and consumables to the Ladle Furnace.',
-  'Mesh006': 'LMF Bin — used for material/additive feeding.',
-  'Bas_Tube_System': 'Conducts electricity from cables to electrode arms.',
-  'Mesh049_1': 'Electrode arms and gantry — position and hold electrodes for arcing process between Roof A and B.',
-  'Electrodes': 'Electrodes transfer electrical power to the steel.'
+  'MHS': 'Materila Handling System - Store, weigh, and automatically transfer additives and consumables to the Ladle Furnace.',
+  'Mesh006': 'LMF Bin — Uses for material/additive feeding directly to the heat.',
+  'Heat_shield': 'Heat shield — Protects area from radiation heat from electrodes',
+  'Bas_Tube_System': 'Bas Tube System - Conducts electricity from cables to electrode arms.',
+  'Mesh049_1': 'Electrode arms and gantry — Positions and hold electrodes for arcing process between Roof A and B.',
+  'Electrodes': 'Electrodes - transfer electrical power to the steel.'
 };
 
 // LIGHTS
