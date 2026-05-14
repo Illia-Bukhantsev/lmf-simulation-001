@@ -48,7 +48,8 @@ const descriptions = {
   'Mesh050_2': 'Roof B — part of the furnace roof system.',
   'Mesh051_2': 'Roof A — main roof section used during LMF treatment.',
   'Mesh043_1': 'Robot for measurements and sampling.',
-  'Mesh006': 'LMF Bin — used for material/additive feeding.'
+  'Mesh006': 'LMF Bin — used for material/additive feeding.',
+  'Mesh049_1': 'Electrodes Arms and Gantry, for arcing process'
 };
 
 // LIGHTS
