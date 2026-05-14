@@ -14,15 +14,11 @@ const camera = new THREE.PerspectiveCamera(
 
 camera.position.set(8, 6, 10);
 
-const renderer = new THREE.WebGLRenderer({
-  antialias: true
-});
-
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
 document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -30,7 +26,6 @@ controls.enableDamping = true;
 controls.target.set(0, 2, 0);
 controls.update();
 
-// LIGHTS
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
 scene.add(ambientLight);
 
@@ -53,21 +48,21 @@ const fillLight = new THREE.DirectionalLight(0xffffff, 0.35);
 fillLight.position.set(-10, 8, -10);
 scene.add(fillLight);
 
-// SOFT SHADOW FLOOR
 const floorGeometry = new THREE.PlaneGeometry(40, 40);
-
-const floorMaterial = new THREE.ShadowMaterial({
-  opacity: 0.18
-});
+const floorMaterial = new THREE.ShadowMaterial({ opacity: 0.18 });
 
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = -Math.PI / 2;
 floor.position.y = -0.02;
 floor.receiveShadow = true;
-
 scene.add(floor);
 
-// LOAD LMF MODEL
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+let selectedObject = null;
+let originalMaterial = null;
+
 const loader = new GLTFLoader();
 
 loader.load(
@@ -83,6 +78,10 @@ loader.load(
       if (child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
+
+        if (child.material) {
+          child.material = child.material.clone();
+        }
       }
     });
 
@@ -100,7 +99,40 @@ loader.load(
   }
 );
 
-// ANIMATION LOOP
+window.addEventListener('click', (event) => {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+
+  const intersects = raycaster.intersectObjects(scene.children, true);
+
+  if (intersects.length === 0) {
+    return;
+  }
+
+  const clickedObject = intersects[0].object;
+
+  if (!clickedObject.isMesh) {
+    return;
+  }
+
+  if (selectedObject && originalMaterial) {
+    selectedObject.material = originalMaterial;
+  }
+
+  selectedObject = clickedObject;
+  originalMaterial = clickedObject.material;
+
+  const highlightMaterial = clickedObject.material.clone();
+  highlightMaterial.emissive = new THREE.Color(0x333333);
+  highlightMaterial.emissiveIntensity = 0.8;
+
+  selectedObject.material = highlightMaterial;
+
+  console.log('Selected object:', selectedObject.name);
+});
+
 function animate() {
   requestAnimationFrame(animate);
 
@@ -110,7 +142,6 @@ function animate() {
 
 animate();
 
-// RESIZE
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
