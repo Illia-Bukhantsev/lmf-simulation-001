@@ -26,6 +26,38 @@ controls.enableDamping = true;
 controls.target.set(0, 2, 0);
 controls.update();
 
+// INFO PANEL
+const infoPanel = document.createElement('div');
+infoPanel.style.position = 'absolute';
+infoPanel.style.top = '20px';
+infoPanel.style.left = '20px';
+infoPanel.style.padding = '14px 18px';
+infoPanel.style.background = 'rgba(255, 255, 255, 0.92)';
+infoPanel.style.border = '1px solid #dddddd';
+infoPanel.style.borderRadius = '12px';
+infoPanel.style.fontFamily = 'Arial, sans-serif';
+infoPanel.style.fontSize = '15px';
+infoPanel.style.maxWidth = '340px';
+infoPanel.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
+infoPanel.style.zIndex = '10';
+infoPanel.innerHTML = '<b>Select a component</b><br>Click any part of the LMF model.';
+document.body.appendChild(infoPanel);
+
+// COMPONENT DESCRIPTIONS
+const descriptions = {
+  ladle: 'The ladle holds molten steel during treatment.',
+  electrode: 'Electrodes provide electrical energy for heating.',
+  roof: 'The roof covers the ladle during furnace operation.',
+  arm: 'The arm moves and positions furnace equipment.',
+  hopper: 'The hopper is used for alloy or additive feeding.',
+  pipe: 'Pipes transfer gases, additives, or support auxiliary systems.',
+  platform: 'The platform supports the LMF equipment.',
+  car: 'The ladle car transports the ladle into position.',
+  cable: 'Cables provide electrical or control connections.',
+  panel: 'The panel represents the control or service area.'
+};
+
+// LIGHTS
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
 scene.add(ambientLight);
 
@@ -48,6 +80,7 @@ const fillLight = new THREE.DirectionalLight(0xffffff, 0.35);
 fillLight.position.set(-10, 8, -10);
 scene.add(fillLight);
 
+// SHADOW FLOOR
 const floorGeometry = new THREE.PlaneGeometry(40, 40);
 const floorMaterial = new THREE.ShadowMaterial({ opacity: 0.18 });
 
@@ -57,12 +90,14 @@ floor.position.y = -0.02;
 floor.receiveShadow = true;
 scene.add(floor);
 
+// SELECTION SYSTEM
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
 let selectedObject = null;
 let originalMaterial = null;
 
+// LOAD MODEL
 const loader = new GLTFLoader();
 
 loader.load(
@@ -99,6 +134,7 @@ loader.load(
   }
 );
 
+// CLICK TO SELECT OBJECT
 window.addEventListener('click', (event) => {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -113,7 +149,7 @@ window.addEventListener('click', (event) => {
 
   const clickedObject = intersects[0].object;
 
-  if (!clickedObject.isMesh) {
+  if (!clickedObject.isMesh || clickedObject === floor) {
     return;
   }
 
@@ -130,9 +166,27 @@ window.addEventListener('click', (event) => {
 
   selectedObject.material = highlightMaterial;
 
-  console.log('Selected object:', selectedObject.name);
+  const objectName = selectedObject.name || 'Unknown component';
+
+  let description = 'No description added yet for this component.';
+
+  for (const key in descriptions) {
+    if (objectName.toLowerCase().includes(key)) {
+      description = descriptions[key];
+      break;
+    }
+  }
+
+  infoPanel.innerHTML = `
+    <b>Selected:</b> ${objectName}<br><br>
+    <b>Description:</b><br>
+    ${description}
+  `;
+
+  console.log('Selected object:', objectName);
 });
 
+// ANIMATION LOOP
 function animate() {
   requestAnimationFrame(animate);
 
@@ -142,6 +196,7 @@ function animate() {
 
 animate();
 
+// RESIZE
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
