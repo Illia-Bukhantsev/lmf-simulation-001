@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x111111);
+scene.background = new THREE.Color(0xffffff);
 
 const camera = new THREE.PerspectiveCamera(
   60,
@@ -19,7 +19,10 @@ const renderer = new THREE.WebGLRenderer({
 });
 
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
 renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
 document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -27,22 +30,42 @@ controls.enableDamping = true;
 controls.target.set(0, 2, 0);
 controls.update();
 
-// LIGHTING
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+// LIGHTS
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
 scene.add(ambientLight);
 
-const dirLight1 = new THREE.DirectionalLight(0xffffff, 1);
-dirLight1.position.set(10, 10, 10);
-dirLight1.castShadow = true;
-scene.add(dirLight1);
+const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+mainLight.position.set(10, 15, 10);
+mainLight.castShadow = true;
 
-const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.6);
-dirLight2.position.set(-10, 5, -10);
-scene.add(dirLight2);
+mainLight.shadow.mapSize.width = 2048;
+mainLight.shadow.mapSize.height = 2048;
+mainLight.shadow.camera.near = 0.5;
+mainLight.shadow.camera.far = 50;
+mainLight.shadow.camera.left = -15;
+mainLight.shadow.camera.right = 15;
+mainLight.shadow.camera.top = 15;
+mainLight.shadow.camera.bottom = -15;
 
-// GRID FLOOR
-const grid = new THREE.GridHelper(30, 30);
-scene.add(grid);
+scene.add(mainLight);
+
+const fillLight = new THREE.DirectionalLight(0xffffff, 0.35);
+fillLight.position.set(-10, 8, -10);
+scene.add(fillLight);
+
+// SOFT SHADOW FLOOR
+const floorGeometry = new THREE.PlaneGeometry(40, 40);
+
+const floorMaterial = new THREE.ShadowMaterial({
+  opacity: 0.18
+});
+
+const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = -0.02;
+floor.receiveShadow = true;
+
+scene.add(floor);
 
 // LOAD LMF MODEL
 const loader = new GLTFLoader();
