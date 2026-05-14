@@ -5,13 +5,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff);
 
-const camera = new THREE.PerspectiveCamera(
-  60,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
-
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(8, 6, 10);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -26,54 +20,104 @@ controls.enableDamping = true;
 controls.target.set(0, 2, 0);
 controls.update();
 
-// FLOATING DESCRIPTION PANEL
-const infoPanel = document.createElement('div');
-infoPanel.style.position = 'absolute';
-infoPanel.style.display = 'none';
-infoPanel.style.padding = '12px 16px';
-infoPanel.style.background = 'rgba(255, 255, 255, 0.96)';
-infoPanel.style.border = '1px solid #dddddd';
-infoPanel.style.borderRadius = '12px';
-infoPanel.style.fontFamily = 'Arial, sans-serif';
-infoPanel.style.fontSize = '15px';
-infoPanel.style.maxWidth = '360px';
-infoPanel.style.boxShadow = '0 4px 16px rgba(0,0,0,0.18)';
-infoPanel.style.zIndex = '10';
-infoPanel.style.pointerEvents = 'none';
-document.body.appendChild(infoPanel);
+// UI PANEL
+const panel = document.createElement('div');
+panel.style.position = 'absolute';
+panel.style.top = '20px';
+panel.style.left = '20px';
+panel.style.width = '360px';
+panel.style.padding = '16px';
+panel.style.background = 'rgba(255,255,255,0.96)';
+panel.style.border = '1px solid #ddd';
+panel.style.borderRadius = '14px';
+panel.style.fontFamily = 'Arial, sans-serif';
+panel.style.fontSize = '15px';
+panel.style.boxShadow = '0 4px 18px rgba(0,0,0,0.16)';
+panel.style.zIndex = '10';
+document.body.appendChild(panel);
 
-// DESCRIPTIONS BY EXACT MESH NAME
+let mode = 'explore';
+let currentStep = 0;
+
 const descriptions = {
   'Mesh050_2': 'Roof B — Close the ladle during heating and provide a controlled environment for electric arc treatment.',
   'Mesh051_1': 'Roof A — Close the ladle during heating and provide a controlled environment for electric arc treatment.',
   'Mesh050_1': 'Roof A — Doors for sampling, measurement, and manual FeAlloys addition.',
   'Mesh043_1': 'Robot for measurements and sampling.',
-  'MHS': 'Materila Handling System - Store, weigh, and automatically transfer additives and consumables to the Ladle Furnace.',
+  'MHS': 'Material Handling System — Store, weigh, and automatically transfer additives and consumables to the Ladle Furnace.',
   'Mesh006': 'LMF Bin — Uses for material/additive feeding directly to the heat.',
-  'Heat_shield': 'Heat shield — Protects area from radiation heat from electrodes',
-  'Bas_Tube_System': 'Bas Tube System - Conducts electricity from cables to electrode arms.',
+  'Heat_Shield': 'Heat shield — Protects the area from radiation heat from electrodes.',
+  'Bas_Tube_System': 'Bas Tube System — Conducts electricity from cables to electrode arms.',
   'Mesh003_1': 'The ladle is used to receive, contain, and safely transport up to 180 tonnes of molten steel.',
-  'Mesh003': 'Ladle tillting device',
-  'Mesh026_6': 'Covers of LTC - Protects LTC drives from technological waste',
-  'Mesh026_3': 'LTC body',
-  'Mesh026_4': 'LTC body',
-  'Mesh026_5': 'LTC body',
-  'Mesh026_2': 'LTC body',
-  'Mesh049_1': 'Electrode arms and gantry — Positions and hold electrodes for arcing process between Roof A and B.',
-  'Electrodes': 'Electrodes - transfer electrical power to the steel.'
+  'Mesh003': 'Ladle tilting device.',
+  'Mesh026_6': 'Covers of LTC — Protects LTC drives from technological waste.',
+  'Mesh026_3': 'LTC body.',
+  'Mesh026_4': 'LTC body.',
+  'Mesh026_5': 'LTC body.',
+  'Mesh026_2': 'LTC body.',
+  'Mesh049_1': 'Electrode arms and gantry — Positions and holds electrodes for arcing process between Roof A and B.',
+  'Electrodes': 'Electrodes — transfer electrical power to the steel.'
 };
 
+const trainingSteps = [
+  { target: 'Mesh051_1', instruction: 'Select Roof A' },
+  { target: 'Mesh050_2', instruction: 'Select Roof B' },
+  { target: 'Mesh006', instruction: 'Select LMF Bin' },
+  { target: 'Mesh043_1', instruction: 'Select robot for measurements and sampling' },
+  { target: 'Mesh003_1', instruction: 'Select the ladle' },
+  { target: 'Mesh049_1', instruction: 'Select electrode arms and gantry' },
+  { target: 'Electrodes', instruction: 'Select electrodes' }
+];
+
+function updatePanel(message = '') {
+  if (mode === 'explore') {
+    panel.innerHTML = `
+      <div style="margin-bottom: 12px;">
+        <button id="exploreBtn" style="padding:8px 10px; margin-right:6px;">Explore Mode</button>
+        <button id="trainingBtn" style="padding:8px 10px;">Guided Training</button>
+      </div>
+      <b>Explore Mode</b><br>
+      Click any component to see its description.<br><br>
+      ${message}
+    `;
+  } else {
+    const step = trainingSteps[currentStep];
+    panel.innerHTML = `
+      <div style="margin-bottom: 12px;">
+        <button id="exploreBtn" style="padding:8px 10px; margin-right:6px;">Explore Mode</button>
+        <button id="trainingBtn" style="padding:8px 10px;">Guided Training</button>
+      </div>
+      <b>Guided Training</b><br>
+      Step ${currentStep + 1} of ${trainingSteps.length}<br><br>
+      <b>Task:</b> ${step.instruction}<br><br>
+      ${message}
+    `;
+  }
+
+  document.getElementById('exploreBtn').onclick = () => {
+    mode = 'explore';
+    clearSelection();
+    updatePanel();
+  };
+
+  document.getElementById('trainingBtn').onclick = () => {
+    mode = 'training';
+    currentStep = 0;
+    clearSelection();
+    updatePanel();
+  };
+}
+
+updatePanel();
+
 // LIGHTS
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
-scene.add(ambientLight);
+scene.add(new THREE.AmbientLight(0xffffff, 0.65));
 
 const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
 mainLight.position.set(10, 15, 10);
 mainLight.castShadow = true;
 mainLight.shadow.mapSize.width = 2048;
 mainLight.shadow.mapSize.height = 2048;
-mainLight.shadow.camera.near = 0.5;
-mainLight.shadow.camera.far = 50;
 mainLight.shadow.camera.left = -15;
 mainLight.shadow.camera.right = 15;
 mainLight.shadow.camera.top = 15;
@@ -89,27 +133,50 @@ const floor = new THREE.Mesh(
   new THREE.PlaneGeometry(40, 40),
   new THREE.ShadowMaterial({ opacity: 0.18 })
 );
-
 floor.rotation.x = -Math.PI / 2;
 floor.position.y = -0.02;
 floor.receiveShadow = true;
 scene.add(floor);
 
-// SELECTION SYSTEM
+// SELECTION
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
 let selectedObject = null;
 let originalMaterial = null;
-let selectedCenter = null;
+
+function clearSelection() {
+  if (selectedObject && originalMaterial) {
+    selectedObject.material = originalMaterial;
+  }
+  selectedObject = null;
+  originalMaterial = null;
+}
+
+function highlightObject(object) {
+  clearSelection();
+
+  selectedObject = object;
+  originalMaterial = object.material;
+
+  const highlightMaterial = object.material.clone();
+  highlightMaterial.color = new THREE.Color(0xff0000);
+  highlightMaterial.emissive = new THREE.Color(0xff0000);
+  highlightMaterial.emissiveIntensity = 0.35;
+
+  selectedObject.material = highlightMaterial;
+}
+
+function getDescription(objectName) {
+  return descriptions[objectName] || 'No description added yet for this component.';
+}
 
 // LOAD MODEL
 const loader = new GLTFLoader();
 
 loader.load(
   './models/LMF1.glb',
-
-  function (gltf) {
+  (gltf) => {
     const model = gltf.scene;
 
     model.position.set(0, 0, 0);
@@ -127,34 +194,19 @@ loader.load(
     });
 
     scene.add(model);
-    console.log('LMF model loaded successfully');
   },
-
-  function (xhr) {
+  (xhr) => {
     console.log((xhr.loaded / xhr.total * 100).toFixed(1) + '% loaded');
   },
-
-  function (error) {
+  (error) => {
     console.error('Error loading LMF model:', error);
   }
 );
 
-function updateInfoPanelPosition() {
-  if (!selectedObject || !selectedCenter) return;
-
-  const screenPosition = selectedCenter.clone();
-  screenPosition.project(camera);
-
-  const x = (screenPosition.x * 0.5 + 0.5) * window.innerWidth;
-  const y = (-screenPosition.y * 0.5 + 0.5) * window.innerHeight;
-
-  infoPanel.style.left = `${x}px`;
-  infoPanel.style.top = `${y}px`;
-  infoPanel.style.transform = 'translate(-50%, -120%)';
-}
-
-// CLICK TO SELECT OBJECT
+// CLICK LOGIC
 window.addEventListener('click', (event) => {
+  if (event.target.tagName === 'BUTTON') return;
+
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -162,61 +214,53 @@ window.addEventListener('click', (event) => {
 
   const intersects = raycaster.intersectObjects(scene.children, true);
 
-  if (intersects.length === 0) {
-    infoPanel.style.display = 'none';
-    return;
-  }
+  if (intersects.length === 0) return;
 
   const clickedObject = intersects[0].object;
 
-  if (!clickedObject.isMesh || clickedObject === floor) {
-    infoPanel.style.display = 'none';
+  if (!clickedObject.isMesh || clickedObject === floor) return;
+
+  const objectName = clickedObject.name;
+  highlightObject(clickedObject);
+
+  if (mode === 'explore') {
+    updatePanel(`
+      <b>Description:</b><br>
+      ${getDescription(objectName)}
+    `);
     return;
   }
 
-  if (selectedObject && originalMaterial) {
-    selectedObject.material = originalMaterial;
+  const step = trainingSteps[currentStep];
+
+  if (objectName === step.target) {
+    currentStep++;
+
+    if (currentStep >= trainingSteps.length) {
+      updatePanel(`
+        <span style="color:green; font-weight:bold;">✅ Training complete!</span><br><br>
+        Great job. You identified all key LMF components.
+      `);
+      currentStep = 0;
+      return;
+    }
+
+    updatePanel(`
+      <span style="color:green; font-weight:bold;">✅ Correct!</span><br><br>
+      ${getDescription(objectName)}
+    `);
+  } else {
+    updatePanel(`
+      <span style="color:red; font-weight:bold;">❌ Not correct.</span><br>
+      Try again.
+    `);
   }
-
-  selectedObject = clickedObject;
-  originalMaterial = clickedObject.material;
-
-  // RED HIGHLIGHT
-  const highlightMaterial = clickedObject.material.clone();
-  highlightMaterial.color = new THREE.Color(0xff0000);
-  highlightMaterial.emissive = new THREE.Color(0xff0000);
-  highlightMaterial.emissiveIntensity = 0.35;
-  selectedObject.material = highlightMaterial;
-
-  const objectName = selectedObject.name || 'Unknown component';
-  const description =
-    descriptions[objectName] || 'No description added yet for this component.';
-
-  // Show only description, not mesh name
-  infoPanel.innerHTML = `
-    <b>Description:</b><br>
-    ${description}
-  `;
-
-  // Calculate point above selected object
-  const box = new THREE.Box3().setFromObject(selectedObject);
-  selectedCenter = new THREE.Vector3();
-  box.getCenter(selectedCenter);
-  selectedCenter.y = box.max.y + 0.6;
-
-  infoPanel.style.display = 'block';
-  updateInfoPanelPosition();
-
-  console.log('Selected object:', objectName);
 });
 
 // ANIMATION LOOP
 function animate() {
   requestAnimationFrame(animate);
-
   controls.update();
-  updateInfoPanelPosition();
-
   renderer.render(scene, camera);
 }
 
@@ -226,7 +270,5 @@ animate();
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-
   renderer.setSize(window.innerWidth, window.innerHeight);
-  updateInfoPanelPosition();
 });
