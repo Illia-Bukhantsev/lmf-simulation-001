@@ -49,7 +49,8 @@ const descriptions = {
   'Mesh051_2': 'Roof A — main roof section used during LMF treatment.',
   'Mesh043_1': 'Robot for measurements and sampling.',
   'Mesh006': 'LMF Bin — used for material/additive feeding.',
-  'Mesh049_1': 'Electrodes Arms and Gantry, for arcing process'
+  'Mesh049_1': 'Electrodes Arms and Gantry, position, hold electrodes for arcing process between roof A and B.',
+  'Electrodes': 'Electrodes transfer electrical power to the steel.'
 };
 
 // LIGHTS
