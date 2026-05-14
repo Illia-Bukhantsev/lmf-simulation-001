@@ -25,14 +25,14 @@ const panel = document.createElement('div');
 panel.style.position = 'absolute';
 panel.style.top = '20px';
 panel.style.left = '20px';
-panel.style.width = '360px';
-panel.style.padding = '16px';
-panel.style.background = 'rgba(255,255,255,0.96)';
-panel.style.border = '1px solid #ddd';
-panel.style.borderRadius = '14px';
+panel.style.width = '380px';
+panel.style.padding = '18px';
+panel.style.background = 'rgba(255,255,255,0.97)';
+panel.style.border = '1px solid #e5e5e5';
+panel.style.borderRadius = '18px';
 panel.style.fontFamily = 'Arial, sans-serif';
 panel.style.fontSize = '15px';
-panel.style.boxShadow = '0 4px 18px rgba(0,0,0,0.16)';
+panel.style.boxShadow = '0 8px 28px rgba(0,0,0,0.18)';
 panel.style.zIndex = '10';
 document.body.appendChild(panel);
 
@@ -45,7 +45,7 @@ const descriptions = {
   'Mesh050_1': 'Roof A — Doors for sampling, measurement, and manual FeAlloys addition.',
   'Mesh043_1': 'Robot for measurements and sampling.',
   'MHS': 'Material Handling System — Store, weigh, and automatically transfer additives and consumables to the Ladle Furnace.',
-  'Mesh006': 'LMF Bin — Uses for material/additive feeding directly to the heat.',
+  'Mesh006': 'LMF Bin — Used for material/additive feeding directly to the heat.',
   'Heat_Shield': 'Heat shield — Protects the area from radiation heat from electrodes.',
   'Bas_Tube_System': 'Bas Tube System — Conducts electricity from cables to electrode arms.',
   'Mesh003_1': 'The ladle is used to receive, contain, and safely transport up to 180 tonnes of molten steel.',
@@ -56,7 +56,7 @@ const descriptions = {
   'Mesh026_5': 'LTC body.',
   'Mesh026_2': 'LTC body.',
   'Mesh049_1': 'Electrode arms and gantry — Positions and holds electrodes for arcing process between Roof A and B.',
-  'Electrodes': 'Electrodes — transfer electrical power to the steel.'
+  'Electrodes': 'Electrodes — Transfer electrical power to the steel.'
 };
 
 const trainingSteps = [
@@ -69,28 +69,83 @@ const trainingSteps = [
   { target: 'Electrodes', instruction: 'Select electrodes' }
 ];
 
+function modeButton(id, label, icon, active) {
+  return `
+    <button
+      id="${id}"
+      style="
+        flex:1;
+        padding:11px 12px;
+        border-radius:12px;
+        border:1px solid ${active ? '#2563eb' : '#d6d6d6'};
+        background:${active ? 'linear-gradient(135deg,#2563eb,#1d4ed8)' : '#ffffff'};
+        color:${active ? '#ffffff' : '#222222'};
+        font-weight:700;
+        cursor:pointer;
+        box-shadow:${active ? '0 5px 14px rgba(37,99,235,0.35)' : '0 2px 8px rgba(0,0,0,0.08)'};
+        transition:all 0.2s ease;
+      "
+    >
+      ${icon} ${label}
+    </button>
+  `;
+}
+
 function updatePanel(message = '') {
+  const exploreActive = mode === 'explore';
+  const trainingActive = mode === 'training';
+
   if (mode === 'explore') {
     panel.innerHTML = `
-      <div style="margin-bottom: 12px;">
-        <button id="exploreBtn" style="padding:8px 10px; margin-right:6px;">Explore Mode</button>
-        <button id="trainingBtn" style="padding:8px 10px;">Guided Training</button>
+      <div style="display:flex; gap:10px; margin-bottom:16px;">
+        ${modeButton('exploreBtn', 'Explore', '👁️', exploreActive)}
+        ${modeButton('trainingBtn', 'Guided', '🎯', trainingActive)}
       </div>
-      <b>Explore Mode</b><br>
-      Click any component to see its description.<br><br>
-      ${message}
+
+      <div style="font-size:18px; font-weight:800; margin-bottom:6px;">
+        Explore Mode
+      </div>
+
+      <div style="color:#555; line-height:1.45;">
+        Click any component to see its description.
+      </div>
+
+      <div style="margin-top:14px; line-height:1.45;">
+        ${message}
+      </div>
     `;
   } else {
     const step = trainingSteps[currentStep];
+
     panel.innerHTML = `
-      <div style="margin-bottom: 12px;">
-        <button id="exploreBtn" style="padding:8px 10px; margin-right:6px;">Explore Mode</button>
-        <button id="trainingBtn" style="padding:8px 10px;">Guided Training</button>
+      <div style="display:flex; gap:10px; margin-bottom:16px;">
+        ${modeButton('exploreBtn', 'Explore', '👁️', exploreActive)}
+        ${modeButton('trainingBtn', 'Guided', '🎯', trainingActive)}
       </div>
-      <b>Guided Training</b><br>
-      Step ${currentStep + 1} of ${trainingSteps.length}<br><br>
-      <b>Task:</b> ${step.instruction}<br><br>
-      ${message}
+
+      <div style="font-size:18px; font-weight:800; margin-bottom:6px;">
+        Guided Training
+      </div>
+
+      <div style="height:8px; background:#e5e7eb; border-radius:999px; overflow:hidden; margin:10px 0 14px;">
+        <div style="
+          width:${((currentStep + 1) / trainingSteps.length) * 100}%;
+          height:100%;
+          background:linear-gradient(90deg,#22c55e,#16a34a);
+        "></div>
+      </div>
+
+      <div style="color:#555; margin-bottom:10px;">
+        Step ${currentStep + 1} of ${trainingSteps.length}
+      </div>
+
+      <div style="padding:12px; background:#f8fafc; border-radius:12px; border:1px solid #e5e7eb;">
+        <b>Task:</b> ${step.instruction}
+      </div>
+
+      <div style="margin-top:14px; line-height:1.45;">
+        ${message}
+      </div>
     `;
   }
 
@@ -149,6 +204,7 @@ function clearSelection() {
   if (selectedObject && originalMaterial) {
     selectedObject.material = originalMaterial;
   }
+
   selectedObject = null;
   originalMaterial = null;
 }
@@ -176,6 +232,7 @@ const loader = new GLTFLoader();
 
 loader.load(
   './models/LMF1.glb',
+
   (gltf) => {
     const model = gltf.scene;
 
@@ -195,9 +252,11 @@ loader.load(
 
     scene.add(model);
   },
+
   (xhr) => {
     console.log((xhr.loaded / xhr.total * 100).toFixed(1) + '% loaded');
   },
+
   (error) => {
     console.error('Error loading LMF model:', error);
   }
@@ -225,8 +284,10 @@ window.addEventListener('click', (event) => {
 
   if (mode === 'explore') {
     updatePanel(`
-      <b>Description:</b><br>
-      ${getDescription(objectName)}
+      <div style="padding:12px; background:#f8fafc; border-radius:12px; border:1px solid #e5e7eb;">
+        <b>Description:</b><br>
+        ${getDescription(objectName)}
+      </div>
     `);
     return;
   }
@@ -238,21 +299,27 @@ window.addEventListener('click', (event) => {
 
     if (currentStep >= trainingSteps.length) {
       updatePanel(`
-        <span style="color:green; font-weight:bold;">✅ Training complete!</span><br><br>
-        Great job. You identified all key LMF components.
+        <div style="padding:12px; background:#dcfce7; color:#166534; border-radius:12px; border:1px solid #86efac;">
+          <b>✅ Training complete!</b><br><br>
+          Great job. You identified all key LMF components.
+        </div>
       `);
       currentStep = 0;
       return;
     }
 
     updatePanel(`
-      <span style="color:green; font-weight:bold;">✅ Correct!</span><br><br>
-      ${getDescription(objectName)}
+      <div style="padding:12px; background:#dcfce7; color:#166534; border-radius:12px; border:1px solid #86efac;">
+        <b>✅ Correct!</b><br><br>
+        ${getDescription(objectName)}
+      </div>
     `);
   } else {
     updatePanel(`
-      <span style="color:red; font-weight:bold;">❌ Not correct.</span><br>
-      Try again.
+      <div style="padding:12px; background:#fee2e2; color:#991b1b; border-radius:12px; border:1px solid #fecaca;">
+        <b>❌ Not correct.</b><br>
+        Try again.
+      </div>
     `);
   }
 });
@@ -260,6 +327,7 @@ window.addEventListener('click', (event) => {
 // ANIMATION LOOP
 function animate() {
   requestAnimationFrame(animate);
+
   controls.update();
   renderer.render(scene, camera);
 }
@@ -270,5 +338,6 @@ animate();
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
+
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
