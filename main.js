@@ -45,8 +45,9 @@ document.body.appendChild(infoPanel);
 
 // DESCRIPTIONS BY EXACT MESH NAME
 const descriptions = {
-  'Mesh050_2': 'Roof B — part of the furnace roof system.',
-  'Mesh051_1': 'Roof A — main roof section used during LMF treatment.',
+  'Mesh050_2': 'Roof B — Close the ladle during heating and provide a controlled environment for electric arc treatment.',
+  'Mesh051_1': 'Roof A — Close the ladle during heating and provide a controlled environment for electric arc treatment.',
+  'Mesh050_1': 'Roof A — Doors for sampling, measurement, and manual FeAlloys Addition',
   'Mesh043_1': 'Robot for measurements and sampling.',
   'Mesh006': 'LMF Bin — used for material/additive feeding.',
   'Mesh049_1': 'Electrodes Arms and Gantry, position, hold electrodes for arcing process between roof A and B.',
