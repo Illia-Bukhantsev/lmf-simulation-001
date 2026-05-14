@@ -52,6 +52,13 @@ const descriptions = {
   'Mesh006': 'LMF Bin — Uses for material/additive feeding directly to the heat.',
   'Heat_shield': 'Heat shield — Protects area from radiation heat from electrodes',
   'Bas_Tube_System': 'Bas Tube System - Conducts electricity from cables to electrode arms.',
+  'Mesh003_1': 'The ladle is used to receive, contain, and safely transport up to 180 tonnes of molten steel.',
+  'Mesh003': 'Ladle tillting device',
+  'Mesh026_6': 'Covers of LTC - Protects LTC drives from technological waste',
+  'Mesh026_3': 'LTC body',
+  'Mesh026_4': 'LTC body',
+  'Mesh026_5': 'LTC body',
+  'Mesh026_2': 'LTC body',
   'Mesh049_1': 'Electrode arms and gantry — Positions and hold electrodes for arcing process between Roof A and B.',
   'Electrodes': 'Electrodes - transfer electrical power to the steel.'
 };
